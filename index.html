@@ -6,7 +6,6 @@
     <title>Proposal</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -30,9 +29,11 @@
             <h2 class="text-2xl font-bold text-red-600 mb-2">Identity Yourself</h2>
             <p class="text-gray-500 mb-6 text-sm">Please enter your details to decrypt the message.</p>
             
-            <div class="space-y-4">
+            <div class="space-y-4 text-left">
                 <input type="text" id="name-input" placeholder="Your Name" 
                     class="w-full px-5 py-4 rounded-full border border-red-100 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition text-center text-lg text-gray-700 placeholder-red-200">
+                
+                <p class="text-sm font-semibold text-gray-500 ml-2">What is your gender?</p>
                 
                 <div class="flex gap-3">
                     <button id="opt-man" onclick="setGender('man')" 
@@ -48,7 +49,7 @@
                 <input type="hidden" id="selected-gender" value="">
 
                 <button onclick="submitName()" 
-                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-full shadow-lg transition transform hover:-translate-y-1 active:scale-95 mt-2">
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-full shadow-lg transition transform hover:-translate-y-1 active:scale-95 mt-4">
                     Authenticate
                 </button>
             </div>
@@ -95,7 +96,6 @@
                 <div class="text-5xl mb-4">📅</div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Schedule Activity</h2>
                 <p class="text-gray-500 mb-6">Proposal accepted! Now, select an activity module:</p>
-                
                 <div class="space-y-3">
                     <button onclick="confirmDate('Dinner Date')" class="w-full bg-white border-2 border-red-100 hover:bg-red-50 text-gray-700 font-bold py-3 rounded-xl transition transform hover:scale-105">🍽️ Dinner Date</button>
                     <button onclick="confirmDate('Movie Night')" class="w-full bg-white border-2 border-red-100 hover:bg-red-50 text-gray-700 font-bold py-3 rounded-xl transition transform hover:scale-105">🎬 Movie Night</button>
@@ -107,13 +107,8 @@
             <div id="success-view" class="hidden animate-bounce-slow">
                 <div class="text-6xl mb-4">🎉</div>
                 <h2 class="text-2xl md:text-3xl font-bold text-red-600 mb-4">Awwwww, so cute</h2>
-                
-                <p id="success-message" class="text-gray-600 text-lg">
-                </p>
-                
-                <p id="date-activity" class="text-sm font-bold text-red-400 mt-2 uppercase tracking-wide">
-                </p>
-
+                <p id="success-message" class="text-gray-600 text-lg"></p>
+                <p id="date-activity" class="text-sm font-bold text-red-400 mt-2 uppercase tracking-wide"></p>
                 <p id="rejection-quote" class="hidden text-sm text-blue-400 mt-4 italic">
                     You really thought rejection was an option... you can not defy me!
                 </p>
@@ -125,28 +120,35 @@
     <script>
         const MessageThanos = "You couldn't live with your own failure, where did that bring you? Back to me! HEHEHEHE.";
         
-        // --- GENDER SELECTION ---
         function setGender(gender) {
             document.getElementById('selected-gender').value = gender;
             const btnMan = document.getElementById('opt-man');
             const btnWoman = document.getElementById('opt-woman');
+            
             const baseClass = "flex-1 py-3 px-4 rounded-2xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300";
             const activeClass = "flex-1 py-3 px-4 rounded-2xl border-2 border-red-500 bg-red-500 text-white font-bold shadow-md transition-all duration-200";
-            if (gender === 'man') { btnMan.className = activeClass; btnWoman.className = baseClass; } 
-            else { btnWoman.className = activeClass; btnMan.className = baseClass; }
+
+            if (gender === 'man') {
+                btnMan.className = activeClass;
+                btnWoman.className = baseClass;
+            } else {
+                btnWoman.className = activeClass;
+                btnMan.className = baseClass;
+            }
         }
         window.addEventListener('DOMContentLoaded', () => { setGender('man'); });
 
-        // --- LOGIN LOGIC ---
         function submitName() {
             const nameInput = document.getElementById('name-input');
             const loginCard = document.getElementById('login-card');
             const proposalCard = document.getElementById('proposal-card');
             const name = nameInput.value.trim() || "Beautiful";
             document.getElementById('target-name').innerText = name;
+            
             loginCard.style.opacity = '0';
             loginCard.style.transform = 'translateY(-20px)';
             loginCard.style.pointerEvents = 'none';
+
             setTimeout(() => {
                 loginCard.classList.add('hidden'); 
                 proposalCard.classList.remove('hidden');
@@ -155,7 +157,6 @@
         }
         function handleKeyPress(event) { if (event.key === 'Enter') submitName(); }
 
-        // --- PROPOSAL LOGIC ---
         let rejectCount = 0;
         const btnNo = document.getElementById('btn-no');
         const subtitle = document.getElementById('subtitle');
@@ -167,7 +168,6 @@
         function acceptLove(wasForced) {
             const content = document.getElementById('proposal-content');
             if (wasForced) {
-                // FORCE: Skip date selection, go straight to Thanos
                 const rejectionQuote = document.getElementById('rejection-quote');
                 document.getElementById('success-message').innerText = MessageThanos;
                 rejectionQuote.classList.remove('hidden'); 
@@ -178,32 +178,34 @@
                     document.getElementById('success-view').classList.remove('hidden');
                 }, 500);
             } else {
-                // CHOICE: Go to Date Selection
                 content.classList.add('hidden');
                 document.getElementById('date-selection').classList.remove('hidden');
             }
         }
 
-        // --- NEW: RANDOMIZED SUCCESS MESSAGE LOGIC ---
+        // --- UPDATED LOGIC HERE ---
         function confirmDate(activity) {
-            const gender = document.getElementById('selected-gender').value;
+            // Get the gender the USER selected (The Recipient)
+            const userGender = document.getElementById('selected-gender').value;
 
-            // 1. Define the pool of messages
+            // LOGIC SWAP: 
+            // If User is 'woman', she makes the Sender the "Happiest MAN".
+            // If User is 'man', he makes the Sender the "Happiest WOMAN".
+            const senderGender = (userGender === 'woman') ? 'Man' : 'Woman';
+
             const sweetMessages = [
-                `I knew you'd say yes! You just made me the happiest ${gender} alive. 💖`,
+                `I knew you'd say yes! You just made me the happiest ${senderGender} alive. 💖`,
                 "Finally! You are the CSS to my HTML. We belong together. 💖",
                 "Mission Accomplished! You + Me = The perfect algorithm. 🚀",
                 "Access Granted to my heart. Forever looks good on us. 🔐",
-                `Best decision ever! I promise to be the best ${gender === 'man' ? 'partner' : 'partner'} you could ask for. 😉`,
+                `Best decision ever! I promise to be the best ${userGender === 'woman' ? 'Boyfriend' : 'Girlfriend'} you could ask for. 😉`,
                 "It's official! We are now a deployed production feature. No rollbacks allowed! 💍",
                 "You just made my heart beat faster than a CPU overclock. I love you! ❤️",
                 "System Update: Happiness levels critically high! You're amazing. 🥰"
             ];
 
-            // 2. Pick a random message
             const randomMessage = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
             
-            // 3. Update the UI
             document.getElementById('success-message').innerText = randomMessage;
             document.getElementById('date-activity').innerText = `Activity Selected: ${activity}`;
             document.getElementById('rejection-quote').classList.add('hidden');
@@ -270,5 +272,4 @@
         }
     </script>
 </body>
-
 </html>
