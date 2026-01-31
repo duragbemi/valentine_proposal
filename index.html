@@ -109,10 +109,10 @@
                 <h2 class="text-2xl md:text-3xl font-bold text-red-600 mb-4">Awwwww, so cute</h2>
                 
                 <p id="success-message" class="text-gray-600 text-lg">
-                    </p>
+                </p>
                 
                 <p id="date-activity" class="text-sm font-bold text-red-400 mt-2 uppercase tracking-wide">
-                    </p>
+                </p>
 
                 <p id="rejection-quote" class="hidden text-sm text-blue-400 mt-4 italic">
                     You really thought rejection was an option... you can not defy me!
@@ -125,27 +125,17 @@
     <script>
         const MessageThanos = "You couldn't live with your own failure, where did that bring you? Back to me! HEHEHEHE.";
         
-        // --- GENDER SELECTION LOGIC ---
+        // --- GENDER SELECTION ---
         function setGender(gender) {
             document.getElementById('selected-gender').value = gender;
             const btnMan = document.getElementById('opt-man');
             const btnWoman = document.getElementById('opt-woman');
-            
             const baseClass = "flex-1 py-3 px-4 rounded-2xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300";
             const activeClass = "flex-1 py-3 px-4 rounded-2xl border-2 border-red-500 bg-red-500 text-white font-bold shadow-md transition-all duration-200";
-
-            if (gender === 'man') {
-                btnMan.className = activeClass;
-                btnWoman.className = baseClass;
-            } else {
-                btnWoman.className = activeClass;
-                btnMan.className = baseClass;
-            }
+            if (gender === 'man') { btnMan.className = activeClass; btnWoman.className = baseClass; } 
+            else { btnWoman.className = activeClass; btnMan.className = baseClass; }
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            setGender('man'); // Default
-        });
+        window.addEventListener('DOMContentLoaded', () => { setGender('man'); });
 
         // --- LOGIN LOGIC ---
         function submitName() {
@@ -153,28 +143,19 @@
             const loginCard = document.getElementById('login-card');
             const proposalCard = document.getElementById('proposal-card');
             const name = nameInput.value.trim() || "Beautiful";
-            
             document.getElementById('target-name').innerText = name;
-
             loginCard.style.opacity = '0';
             loginCard.style.transform = 'translateY(-20px)';
             loginCard.style.pointerEvents = 'none';
-
             setTimeout(() => {
                 loginCard.classList.add('hidden'); 
                 proposalCard.classList.remove('hidden');
-                setTimeout(() => {
-                    proposalCard.style.opacity = '1';
-                    proposalCard.style.transform = 'translateY(0)';
-                }, 50);
+                setTimeout(() => { proposalCard.style.opacity = '1'; proposalCard.style.transform = 'translateY(0)'; }, 50);
             }, 500);
         }
+        function handleKeyPress(event) { if (event.key === 'Enter') submitName(); }
 
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') submitName();
-        }
-
-        // --- PROPOSAL & LOGIC ---
+        // --- PROPOSAL LOGIC ---
         let rejectCount = 0;
         const btnNo = document.getElementById('btn-no');
         const subtitle = document.getElementById('subtitle');
@@ -183,138 +164,92 @@
         const statusText = document.getElementById('status-text');
         const percentText = document.getElementById('percent-text');
 
-        // Step 1: Handle Initial Accept/Force
         function acceptLove(wasForced) {
             const content = document.getElementById('proposal-content');
-            
             if (wasForced) {
-                // FORCE: Skip date selection, go straight to Thanos success with confetti
+                // FORCE: Skip date selection, go straight to Thanos
                 const rejectionQuote = document.getElementById('rejection-quote');
                 document.getElementById('success-message').innerText = MessageThanos;
                 rejectionQuote.classList.remove('hidden'); 
-                
-                triggerConfetti(); // Boom!
-
+                triggerConfetti();
                 content.style.opacity = '0';
                 setTimeout(() => {
                     content.classList.add('hidden');
                     document.getElementById('success-view').classList.remove('hidden');
                 }, 500);
-
             } else {
-                // CHOICE: Go to Date Selection Screen
+                // CHOICE: Go to Date Selection
                 content.classList.add('hidden');
                 document.getElementById('date-selection').classList.remove('hidden');
             }
         }
 
-        // Step 2: Handle Date Confirmation
+        // --- NEW: RANDOMIZED SUCCESS MESSAGE LOGIC ---
         function confirmDate(activity) {
             const gender = document.getElementById('selected-gender').value;
-            const dynamicMessageYes = `I knew you'd say yes! I'm sure you're the happiest ${gender} alive. 💖`;
+
+            // 1. Define the pool of messages
+            const sweetMessages = [
+                `I knew you'd say yes! You just made me the happiest ${gender} alive. 💖`,
+                "Finally! You are the CSS to my HTML. We belong together. 💖",
+                "Mission Accomplished! You + Me = The perfect algorithm. 🚀",
+                "Access Granted to my heart. Forever looks good on us. 🔐",
+                `Best decision ever! I promise to be the best ${gender === 'man' ? 'partner' : 'partner'} you could ask for. 😉`,
+                "It's official! We are now a deployed production feature. No rollbacks allowed! 💍",
+                "You just made my heart beat faster than a CPU overclock. I love you! ❤️",
+                "System Update: Happiness levels critically high! You're amazing. 🥰"
+            ];
+
+            // 2. Pick a random message
+            const randomMessage = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
             
-            // Set Text
-            document.getElementById('success-message').innerText = dynamicMessageYes;
+            // 3. Update the UI
+            document.getElementById('success-message').innerText = randomMessage;
             document.getElementById('date-activity').innerText = `Activity Selected: ${activity}`;
             document.getElementById('rejection-quote').classList.add('hidden');
             
-            // Trigger Confetti
             triggerConfetti();
-
-            // Transition
             document.getElementById('date-selection').classList.add('hidden');
             document.getElementById('success-view').classList.remove('hidden');
         }
 
-        // --- CONFETTI LOGIC ---
         function triggerConfetti() {
             const duration = 3000;
             const animationEnd = Date.now() + duration;
             const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
             const randomInRange = (min, max) => Math.random() * (max - min) + min;
-
             const interval = setInterval(function() {
                 const timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
-
+                if (timeLeft <= 0) { return clearInterval(interval); }
                 const particleCount = 50 * (timeLeft / duration);
-
-                // Create confetti from two sources (left and right)
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
             }, 250);
         }
 
-        // --- REJECTION LOGIC ---
         function rejectLove() {
             rejectCount++;
-
-            if (rejectCount === 1) {
-                btnNo.innerText = "Are you sure?";
-                subtitle.innerText = "Wait, re-check your calculations. The data says yes.";
-            } 
-            else if (rejectCount === 2) {
-                btnNo.innerText = "Really sure?";
-                subtitle.innerText = "Warning: Doing this will result in a sad backend engineer.";
-            } 
-            else if (rejectCount === 3) {
-                btnNo.innerText = "You're breaking my heart?";
-                subtitle.innerText = "So you love to see a heart-broken man? Think again.";
-            }
-            else if (rejectCount === 4) {
-                btnNo.innerText = "Are you fr? You still want to pick No?";
-                subtitle.innerText = "That's why you're single. Just kidding... or am I?";
-            }
-             else if (rejectCount === 5) {
-                btnNo.innerText = "You're breaking my heart?";
-                subtitle.innerText = "I think i'm going to have a heart attack!";
-            }
-            else if (rejectCount === 6) {
-                btnNo.innerText = "Oya, calm down? You know love is sweet?";
-                subtitle.innerText = "Don't make me activate the emergency protocol.";
-            }
-             else if (rejectCount === 7) {
-                btnNo.innerText = "Omo, you really no go gree?";
-                subtitle.innerText = "You kala gan o. Better find love!";
-            }
-            else if (rejectCount === 8) {
-                btnNo.innerText = "Who broke your heart really do you strong thing?";
-                subtitle.innerText = "I'm not going to let you reject me like this. I'm going to make you change your mind.";
-            }
-             else if (rejectCount === 9) {
-                btnNo.innerText = "C'mon last chance?";
-                subtitle.innerText = "The hardest choices require the strongest wills.";
-            }
-            else {
-                forceAcceptSequence();
-            }
+            if (rejectCount === 1) { btnNo.innerText = "Are you sure?"; subtitle.innerText = "Wait, re-check your calculations. The data says yes."; } 
+            else if (rejectCount === 2) { btnNo.innerText = "Really sure?"; subtitle.innerText = "Warning: Doing this will result in a sad backend engineer."; } 
+            else if (rejectCount === 3) { btnNo.innerText = "You're breaking my heart?"; subtitle.innerText = "So you love to see a heart-broken man? Think again."; }
+            else if (rejectCount === 4) { btnNo.innerText = "Are you fr? You still want to pick No?"; subtitle.innerText = "That's why you're single. Just kidding... or am I?"; }
+            else if (rejectCount === 5) { btnNo.innerText = "You're breaking my heart?"; subtitle.innerText = "I think i'm going to have a heart attack!"; }
+            else if (rejectCount === 6) { btnNo.innerText = "Oya, calm down? You know love is sweet?"; subtitle.innerText = "Don't make me activate the emergency protocol."; }
+            else if (rejectCount === 7) { btnNo.innerText = "Omo, you really no go gree?"; subtitle.innerText = "You kala gan o. Better find love!"; }
+            else if (rejectCount === 8) { btnNo.innerText = "Who broke your heart really do you strong thing?"; subtitle.innerText = "I'm not going to let you reject me like this. I'm going to make you change your mind."; }
+            else if (rejectCount === 9) { btnNo.innerText = "C'mon last chance?"; subtitle.innerText = "The hardest choices require the strongest wills."; }
+            else { forceAcceptSequence(); }
         }
 
-       function forceAcceptSequence() {
+        function forceAcceptSequence() {
             document.getElementById('buttons').classList.add('hidden');
             subtitle.innerText = "Initiating proposal protocol...";
             loader.classList.remove('hidden');
-            
-            const steps = [
-                { w: 30, t: "Locking User Input..." },
-                { w: 40, t: "Bypassing Emotional Barriers..." },
-                { w: 50, t: "Wait for it...." },
-                { w: 60, t: "Hold on a lil bit..." },
-                { w: 70, t: "Oi, chill out..." },
-                { w: 80, t: "Almost there..." },
-                { w: 90, t: "Just a moment..." },
-                { w: 100, t: "Finalizing..." }
-            ];
-            
+            const steps = [{w:30,t:"Locking User Input..."},{w:40,t:"Bypassing Emotional Barriers..."},{w:50,t:"Wait for it...."},{w:60,t:"Hold on a lil bit..."},{w:70,t:"Oi, chill out..."},{w:80,t:"Almost there..."},{w:90,t:"Just a moment..."},{w:100,t:"Finalizing..."}];
             let stepIndex = 0;
             const interval = setInterval(() => {
                 if (stepIndex >= steps.length) {
                     clearInterval(interval);
-                    // Force Accept (Thanos mode)
                     setTimeout(() => acceptLove(true), 800);
                     return;
                 }
