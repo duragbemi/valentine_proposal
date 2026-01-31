@@ -6,6 +6,8 @@
     <title>Proposal</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
@@ -89,11 +91,29 @@
                 </div>
             </div>
 
+            <div id="date-selection" class="hidden transition-opacity duration-500">
+                <div class="text-5xl mb-4">📅</div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Schedule Activity</h2>
+                <p class="text-gray-500 mb-6">Proposal accepted! Now, select an activity module:</p>
+                
+                <div class="space-y-3">
+                    <button onclick="confirmDate('Dinner Date')" class="w-full bg-white border-2 border-red-100 hover:bg-red-50 text-gray-700 font-bold py-3 rounded-xl transition transform hover:scale-105">🍽️ Dinner Date</button>
+                    <button onclick="confirmDate('Movie Night')" class="w-full bg-white border-2 border-red-100 hover:bg-red-50 text-gray-700 font-bold py-3 rounded-xl transition transform hover:scale-105">🎬 Movie Night</button>
+                    <button onclick="confirmDate('Arcade/Adventure')" class="w-full bg-white border-2 border-red-100 hover:bg-red-50 text-gray-700 font-bold py-3 rounded-xl transition transform hover:scale-105">🎡 Arcade / Adventure</button>
+                    <button onclick="confirmDate('Netflix & Chill')" class="w-full bg-white border-2 border-red-100 hover:bg-red-50 text-gray-700 font-bold py-3 rounded-xl transition transform hover:scale-105">🏠 Stay In & Chill</button>
+                </div>
+            </div>
+
             <div id="success-view" class="hidden animate-bounce-slow">
                 <div class="text-6xl mb-4">🎉</div>
                 <h2 class="text-2xl md:text-3xl font-bold text-red-600 mb-4">Awwwww, so cute</h2>
+                
                 <p id="success-message" class="text-gray-600 text-lg">
                     </p>
+                
+                <p id="date-activity" class="text-sm font-bold text-red-400 mt-2 uppercase tracking-wide">
+                    </p>
+
                 <p id="rejection-quote" class="hidden text-sm text-blue-400 mt-4 italic">
                     You really thought rejection was an option... you can not defy me!
                 </p>
@@ -107,16 +127,11 @@
         
         // --- GENDER SELECTION LOGIC ---
         function setGender(gender) {
-            // Update hidden value
             document.getElementById('selected-gender').value = gender;
-            
-            // Visual Update
             const btnMan = document.getElementById('opt-man');
             const btnWoman = document.getElementById('opt-woman');
             
-            // Base Classes (Unselected)
             const baseClass = "flex-1 py-3 px-4 rounded-2xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300";
-            // Active Classes (Selected)
             const activeClass = "flex-1 py-3 px-4 rounded-2xl border-2 border-red-500 bg-red-500 text-white font-bold shadow-md transition-all duration-200";
 
             if (gender === 'man') {
@@ -128,9 +143,8 @@
             }
         }
 
-        // Set Default Gender to avoid errors
         window.addEventListener('DOMContentLoaded', () => {
-            setGender('man'); // Default selection
+            setGender('man'); // Default
         });
 
         // --- LOGIN LOGIC ---
@@ -160,7 +174,7 @@
             if (event.key === 'Enter') submitName();
         }
 
-        // --- PROPOSAL LOGIC ---
+        // --- PROPOSAL & LOGIC ---
         let rejectCount = 0;
         const btnNo = document.getElementById('btn-no');
         const subtitle = document.getElementById('subtitle');
@@ -169,31 +183,73 @@
         const statusText = document.getElementById('status-text');
         const percentText = document.getElementById('percent-text');
 
+        // Step 1: Handle Initial Accept/Force
         function acceptLove(wasForced) {
             const content = document.getElementById('proposal-content');
-            const rejectionQuote = document.getElementById('rejection-quote');
             
-            // Get Gender from hidden input
-            const gender = document.getElementById('selected-gender').value;
-            
-            // Dynamic Message
-            const dynamicMessageYes = `I knew you'd say yes! I'm sure you're the happiest ${gender} alive. 💖`;
-
             if (wasForced) {
+                // FORCE: Skip date selection, go straight to Thanos success with confetti
+                const rejectionQuote = document.getElementById('rejection-quote');
                 document.getElementById('success-message').innerText = MessageThanos;
                 rejectionQuote.classList.remove('hidden'); 
-            } else {
-                document.getElementById('success-message').innerText = dynamicMessageYes;
-                rejectionQuote.classList.add('hidden');
-            }
+                
+                triggerConfetti(); // Boom!
 
-            content.style.opacity = '0';
-            setTimeout(() => {
+                content.style.opacity = '0';
+                setTimeout(() => {
+                    content.classList.add('hidden');
+                    document.getElementById('success-view').classList.remove('hidden');
+                }, 500);
+
+            } else {
+                // CHOICE: Go to Date Selection Screen
                 content.classList.add('hidden');
-                document.getElementById('success-view').classList.remove('hidden');
-            }, 500);
+                document.getElementById('date-selection').classList.remove('hidden');
+            }
         }
 
+        // Step 2: Handle Date Confirmation
+        function confirmDate(activity) {
+            const gender = document.getElementById('selected-gender').value;
+            const dynamicMessageYes = `I knew you'd say yes! I'm sure you're the happiest ${gender} alive. 💖`;
+            
+            // Set Text
+            document.getElementById('success-message').innerText = dynamicMessageYes;
+            document.getElementById('date-activity').innerText = `Activity Selected: ${activity}`;
+            document.getElementById('rejection-quote').classList.add('hidden');
+            
+            // Trigger Confetti
+            triggerConfetti();
+
+            // Transition
+            document.getElementById('date-selection').classList.add('hidden');
+            document.getElementById('success-view').classList.remove('hidden');
+        }
+
+        // --- CONFETTI LOGIC ---
+        function triggerConfetti() {
+            const duration = 3000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+
+                // Create confetti from two sources (left and right)
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        // --- REJECTION LOGIC ---
         function rejectLove() {
             rejectCount++;
 
@@ -258,6 +314,7 @@
             const interval = setInterval(() => {
                 if (stepIndex >= steps.length) {
                     clearInterval(interval);
+                    // Force Accept (Thanos mode)
                     setTimeout(() => acceptLove(true), 800);
                     return;
                 }
@@ -278,4 +335,5 @@
         }
     </script>
 </body>
+
 </html>
