@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Proposal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Poppins', 'sans-serif'], },
+                    animation: { 'bounce-slow': 'bounce 3.5s infinite', }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-red-400 via-pink-200 to-slate-100 min-h-screen flex items-center justify-center overflow-hidden">
+
+    <div class="relative w-[95%] max-w-md">
+        
+        <div id="login-card" class="bg-white/90 backdrop-blur-xl p-6 md:p-10 rounded-3xl shadow-2xl text-center transition-all duration-700 transform translate-y-0 opacity-100 border-2 border-white">
+            <div class="text-5xl mb-4">🔒</div>
+            <h2 class="text-2xl font-bold text-red-600 mb-2">Identity Verification</h2>
+            <p class="text-gray-500 mb-6 text-sm">Please enter your details to decrypt the message.</p>
+            
+            <div class="space-y-4">
+                <input type="text" id="name-input" placeholder="Your Name" 
+                    class="w-full px-5 py-4 rounded-full border border-red-100 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition text-center text-lg text-gray-700 placeholder-red-200">
+                
+                <div class="flex gap-3">
+                    <button id="opt-man" onclick="setGender('man')" 
+                        class="flex-1 py-3 px-4 rounded-2xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300">
+                        Male 👨
+                    </button>
+                    
+                    <button id="opt-woman" onclick="setGender('woman')" 
+                        class="flex-1 py-3 px-4 rounded-2xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300">
+                        Female 👩
+                    </button>
+                </div>
+                <input type="hidden" id="selected-gender" value="">
+
+                <button onclick="submitName()" 
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-full shadow-lg transition transform hover:-translate-y-1 active:scale-95 mt-2">
+                    Authenticate
+                </button>
+            </div>
+        </div>
+
+        <div id="proposal-card" class="hidden w-full bg-white/90 backdrop-blur-md p-6 md:p-10 rounded-3xl shadow-2xl text-center transition-all duration-700 transform translate-y-20 opacity-0 border-2 border-white">
+        
+            <div id="proposal-content" class="transition-opacity duration-500">
+                <div class="text-6xl mb-4 md:mb-6 animate-pulse">❤️</div>
+                
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+                    Hey, <span id="target-name" class="text-red-500">Valentine</span>
+                </h1>
+                
+                <p id="subtitle" class="text-gray-600 mb-6 md:mb-8 text-base md:text-lg leading-relaxed">
+                    Warning: Saying 'Yes' may lead to laughter, affection and a great Valentine's Day. 
+                    That being said, Will you be Mine?
+                </p>
+                
+                <div id="buttons" class="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+                    <button onclick="acceptLove(false)" 
+                            class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 md:py-4 px-8 rounded-full shadow-lg transform transition hover:-translate-y-1 hover:shadow-xl active:scale-95">
+                        Yes, absolutely!
+                    </button>
+                    
+                    <button id="btn-no" onclick="rejectLove()" 
+                            class="w-full sm:w-auto bg-white hover:bg-red-50 text-red-500 border-2 border-red-100 font-bold py-3 md:py-4 px-8 rounded-full transition active:scale-95">
+                        No thanks 
+                    </button>
+                </div>
+
+                <div id="loader" class="hidden mt-6 text-left">
+                    <div class="flex justify-between items-end mb-2">
+                        <span id="status-text" class="text-xs font-bold text-blue-500 uppercase tracking-widest">System Override...</span>
+                        <span id="percent-text" class="text-xs text-blue-400">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div id="progress" class="bg-gradient-to-r from-red-400 to-red-600 h-2.5 rounded-full w-0 transition-all duration-300 ease-out"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="success-view" class="hidden animate-bounce-slow">
+                <div class="text-6xl mb-4">🎉</div>
+                <h2 class="text-2xl md:text-3xl font-bold text-red-600 mb-4">Awwwww, so cute</h2>
+                <p id="success-message" class="text-gray-600 text-lg">
+                    </p>
+                <p id="rejection-quote" class="hidden text-sm text-blue-400 mt-4 italic">
+                    You really thought rejection was an option... you can not defy me!
+                </p>
+            </div>
+
+        </div> 
+    </div>
+
+    <script>
+        const MessageThanos = "You couldn't live with your own failure, where did that bring you? Back to me! HEHEHEHE.";
+        
+        // --- GENDER SELECTION LOGIC ---
+        function setGender(gender) {
+            // Update hidden value
+            document.getElementById('selected-gender').value = gender;
+            
+            // Visual Update
+            const btnMan = document.getElementById('opt-man');
+            const btnWoman = document.getElementById('opt-woman');
+            
+            // Base Classes (Unselected)
+            const baseClass = "flex-1 py-3 px-4 rounded-2xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300";
+            // Active Classes (Selected)
+            const activeClass = "flex-1 py-3 px-4 rounded-2xl border-2 border-red-500 bg-red-500 text-white font-bold shadow-md transition-all duration-200";
+
+            if (gender === 'man') {
+                btnMan.className = activeClass;
+                btnWoman.className = baseClass;
+            } else {
+                btnWoman.className = activeClass;
+                btnMan.className = baseClass;
+            }
+        }
+
+        // Set Default Gender to avoid errors
+        window.addEventListener('DOMContentLoaded', () => {
+            setGender('man'); // Default selection
+        });
+
+        // --- LOGIN LOGIC ---
+        function submitName() {
+            const nameInput = document.getElementById('name-input');
+            const loginCard = document.getElementById('login-card');
+            const proposalCard = document.getElementById('proposal-card');
+            const name = nameInput.value.trim() || "Beautiful";
+            
+            document.getElementById('target-name').innerText = name;
+
+            loginCard.style.opacity = '0';
+            loginCard.style.transform = 'translateY(-20px)';
+            loginCard.style.pointerEvents = 'none';
+
+            setTimeout(() => {
+                loginCard.classList.add('hidden'); 
+                proposalCard.classList.remove('hidden');
+                setTimeout(() => {
+                    proposalCard.style.opacity = '1';
+                    proposalCard.style.transform = 'translateY(0)';
+                }, 50);
+            }, 500);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') submitName();
+        }
+
+        // --- PROPOSAL LOGIC ---
+        let rejectCount = 0;
+        const btnNo = document.getElementById('btn-no');
+        const subtitle = document.getElementById('subtitle');
+        const loader = document.getElementById('loader');
+        const progress = document.getElementById('progress');
+        const statusText = document.getElementById('status-text');
+        const percentText = document.getElementById('percent-text');
+
+        function acceptLove(wasForced) {
+            const content = document.getElementById('proposal-content');
+            const rejectionQuote = document.getElementById('rejection-quote');
+            
+            // Get Gender from hidden input
+            const gender = document.getElementById('selected-gender').value;
+            
+            // Dynamic Message
+            const dynamicMessageYes = `I knew you'd say yes! You just made me the happiest ${gender} alive. 💖`;
+
+            if (wasForced) {
+                document.getElementById('success-message').innerText = MessageThanos;
+                rejectionQuote.classList.remove('hidden'); 
+            } else {
+                document.getElementById('success-message').innerText = dynamicMessageYes;
+                rejectionQuote.classList.add('hidden');
+            }
+
+            content.style.opacity = '0';
+            setTimeout(() => {
+                content.classList.add('hidden');
+                document.getElementById('success-view').classList.remove('hidden');
+            }, 500);
+        }
+
+        function rejectLove() {
+            rejectCount++;
+
+            if (rejectCount === 1) {
+                btnNo.innerText = "Are you sure?";
+                subtitle.innerText = "Wait, re-check your calculations. The data says yes.";
+            } 
+            else if (rejectCount === 2) {
+                btnNo.innerText = "Really sure?";
+                subtitle.innerText = "Warning: Doing this will result in a sad backend engineer.";
+            } 
+            else if (rejectCount === 3) {
+                btnNo.innerText = "You're breaking my heart?";
+                subtitle.innerText = "So you love to see a heart-broken man? Think again.";
+            }
+            else if (rejectCount === 4) {
+                btnNo.innerText = "Are you fr? You still want to pick No?";
+                subtitle.innerText = "That's why you're single. Just kidding... or am I?";
+            }
+             else if (rejectCount === 5) {
+                btnNo.innerText = "You're breaking my heart?";
+                subtitle.innerText = "I think i'm going to have a heart attack!";
+            }
+            else if (rejectCount === 6) {
+                btnNo.innerText = "Oya, calm down? You know love is sweet?";
+                subtitle.innerText = "Don't make me activate the emergency protocol.";
+            }
+             else if (rejectCount === 7) {
+                btnNo.innerText = "Omo, you really no go gree?";
+                subtitle.innerText = "You kala gan o. Better find love!";
+            }
+            else if (rejectCount === 8) {
+                btnNo.innerText = "Who broke your heart really do you strong thing?";
+                subtitle.innerText = "I'm not going to let you reject me like this. I'm going to make you change your mind.";
+            }
+             else if (rejectCount === 9) {
+                btnNo.innerText = "C'mon last chance?";
+                subtitle.innerText = "The hardest choices require the strongest wills.";
+            }
+            else {
+                forceAcceptSequence();
+            }
+        }
+
+       function forceAcceptSequence() {
+            document.getElementById('buttons').classList.add('hidden');
+            subtitle.innerText = "Initiating proposal protocol...";
+            loader.classList.remove('hidden');
+            
+            const steps = [
+                { w: 30, t: "Locking User Input..." },
+                { w: 40, t: "Bypassing Emotional Barriers..." },
+                { w: 50, t: "Wait for it...." },
+                { w: 60, t: "Hold on a lil bit..." },
+                { w: 70, t: "Oi, chill out..." },
+                { w: 80, t: "Almost there..." },
+                { w: 90, t: "Just a moment..." },
+                { w: 100, t: "Finalizing..." }
+            ];
+            
+            let stepIndex = 0;
+            const interval = setInterval(() => {
+                if (stepIndex >= steps.length) {
+                    clearInterval(interval);
+                    setTimeout(() => acceptLove(true), 800);
+                    return;
+                }
+                const step = steps[stepIndex];
+                progress.style.width = step.w + "%";
+                statusText.innerText = step.t;
+                percentText.innerText = step.w + "%";
+                stepIndex++;
+            }, 800);
+        }
+        
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.has('name')) {
+                document.getElementById('name-input').value = urlParams.get('name');
+                submitName(); 
+            }
+        }
+    </script>
+</body>
+</html>
