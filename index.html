@@ -6,6 +6,7 @@
     <title>Proposal</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -26,7 +27,7 @@
         
         <div id="login-card" class="bg-white/90 backdrop-blur-xl p-6 md:p-10 rounded-3xl shadow-2xl text-center transition-all duration-700 transform translate-y-0 opacity-100 border-2 border-white">
             <div class="text-5xl mb-4">🔒</div>
-            <h2 class="text-2xl font-bold text-red-600 mb-2">Identity Yourself</h2>
+            <h2 class="text-2xl font-bold text-red-600 mb-2">Identity Verification</h2>
             <p class="text-gray-500 mb-6 text-sm">Please enter your details to decrypt the message.</p>
             
             <div class="space-y-4 text-left">
@@ -35,17 +36,27 @@
                 
                 <p class="text-sm font-semibold text-gray-500 ml-2">What is your gender?</p>
                 
-                <div class="flex gap-3">
+                <div class="flex gap-2">
                     <button id="opt-man" onclick="setGender('man')" 
-                        class="flex-1 py-3 px-4 rounded-2xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300">
+                        class="flex-1 py-3 px-2 rounded-xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300 text-sm">
                         Male 👨
                     </button>
                     
                     <button id="opt-woman" onclick="setGender('woman')" 
-                        class="flex-1 py-3 px-4 rounded-2xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300">
+                        class="flex-1 py-3 px-2 rounded-xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300 text-sm">
                         Female 👩
                     </button>
+
+                    <button id="opt-other" onclick="handleOtherGender()" 
+                        class="flex-1 py-3 px-2 rounded-xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300 text-sm">
+                        Others 👽
+                    </button>
                 </div>
+                
+                <p id="gender-error" class="hidden text-xs text-red-600 font-bold text-center animate-pulse">
+                    ⚠️ Check your birth certificate and come back!
+                </p>
+
                 <input type="hidden" id="selected-gender" value="">
 
                 <button onclick="submitName()" 
@@ -96,19 +107,60 @@
                 <div class="text-5xl mb-4">📅</div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Schedule Activity</h2>
                 <p class="text-gray-500 mb-6">Proposal accepted! Now, select an activity module:</p>
+                
                 <div class="space-y-3">
                     <button onclick="confirmDate('Dinner Date')" class="w-full bg-white border-2 border-red-100 hover:bg-red-50 text-gray-700 font-bold py-3 rounded-xl transition transform hover:scale-105">🍽️ Dinner Date</button>
                     <button onclick="confirmDate('Movie Night')" class="w-full bg-white border-2 border-red-100 hover:bg-red-50 text-gray-700 font-bold py-3 rounded-xl transition transform hover:scale-105">🎬 Movie Night</button>
                     <button onclick="confirmDate('Arcade/Adventure')" class="w-full bg-white border-2 border-red-100 hover:bg-red-50 text-gray-700 font-bold py-3 rounded-xl transition transform hover:scale-105">🎡 Arcade / Adventure</button>
-                    <button onclick="confirmDate('Netflix & Chill')" class="w-full bg-white border-2 border-red-100 hover:bg-red-50 text-gray-700 font-bold py-3 rounded-xl transition transform hover:scale-105">🏠 Stay In & Chill</button>
+                    
+                    <button onclick="askForMoney()" class="w-full bg-green-50 border-2 border-green-200 hover:bg-green-100 text-green-700 font-bold py-3 rounded-xl transition transform hover:scale-105">💸 Just send me, Money</button>
                 </div>
+            </div>
+
+            <div id="bank-card" class="hidden transition-opacity duration-500">
+                <div class="text-5xl mb-4">🏦</div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Secure Payment</h2>
+                <p class="text-gray-500 mb-6 text-sm">Enter your details to receive funds.</p>
+                
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Bank Name</label>
+                        <input type="text" placeholder="e.g. Opay, GTBank" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Account Number</label>
+                        <input type="number" placeholder="0123456789" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none">
+                    </div>
+                    <button onclick="processTransaction()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg mt-2">
+                        Receive Funds
+                    </button>
+                </div>
+            </div>
+
+            <div id="money-success-view" class="hidden animate-bounce-slow">
+                <div class="text-6xl mb-4">💸</div>
+                <h2 class="text-2xl font-bold text-green-600 mb-2">Transaction Successful!</h2>
+                
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-4 text-sm text-gray-600 font-mono">
+                    <p>Status: <span class="text-green-600 font-bold">APPROVED</span></p>
+                    <p>Amount: $1,000,000.00</p>
+                    <p class="mt-2 border-t pt-2 text-xs italic">
+                        ** Error: Sender has insufficient funds. Please try loving him for free. **
+                    </p>
+                </div>
+
+                <p id="money-quote" class="text-gray-500 italic">
+                    "My love is priceless, but my account balance is humble." 😂
+                </p>
             </div>
 
             <div id="success-view" class="hidden animate-bounce-slow">
                 <div class="text-6xl mb-4">🎉</div>
                 <h2 class="text-2xl md:text-3xl font-bold text-red-600 mb-4">Awwwww, so cute</h2>
+                
                 <p id="success-message" class="text-gray-600 text-lg"></p>
                 <p id="date-activity" class="text-sm font-bold text-red-400 mt-2 uppercase tracking-wide"></p>
+
                 <p id="rejection-quote" class="hidden text-sm text-blue-400 mt-4 italic">
                     You really thought rejection was an option... you can not defy me!
                 </p>
@@ -120,13 +172,20 @@
     <script>
         const MessageThanos = "You couldn't live with your own failure, where did that bring you? Back to me! HEHEHEHE.";
         
+        // --- GENDER LOGIC ---
         function setGender(gender) {
             document.getElementById('selected-gender').value = gender;
+            document.getElementById('gender-error').classList.add('hidden'); // Hide error if they fix it
+
             const btnMan = document.getElementById('opt-man');
             const btnWoman = document.getElementById('opt-woman');
+            const btnOther = document.getElementById('opt-other');
             
-            const baseClass = "flex-1 py-3 px-4 rounded-2xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300";
-            const activeClass = "flex-1 py-3 px-4 rounded-2xl border-2 border-red-500 bg-red-500 text-white font-bold shadow-md transition-all duration-200";
+            const baseClass = "flex-1 py-3 px-2 rounded-xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300 text-sm";
+            const activeClass = "flex-1 py-3 px-2 rounded-xl border-2 border-red-500 bg-red-500 text-white font-bold shadow-md transition-all duration-200 text-sm";
+
+            // Reset Other
+            btnOther.className = baseClass;
 
             if (gender === 'man') {
                 btnMan.className = activeClass;
@@ -136,9 +195,42 @@
                 btnMan.className = baseClass;
             }
         }
-        window.addEventListener('DOMContentLoaded', () => { setGender('man'); });
 
+        // --- NEW: OTHERS BUTTON LOGIC ---
+        function handleOtherGender() {
+            // 1. Reset selection value
+            document.getElementById('selected-gender').value = 'other';
+            
+            // 2. Visual Update
+            const btnMan = document.getElementById('opt-man');
+            const btnWoman = document.getElementById('opt-woman');
+            const btnOther = document.getElementById('opt-other');
+            const baseClass = "flex-1 py-3 px-2 rounded-xl border-2 border-red-100 text-gray-500 font-semibold transition-all duration-200 hover:border-red-300 text-sm";
+            
+            btnMan.className = baseClass;
+            btnWoman.className = baseClass;
+            btnOther.className = "flex-1 py-3 px-2 rounded-xl border-2 border-red-600 bg-red-100 text-red-600 font-bold shadow-inner transition-all duration-200 text-sm";
+
+            // 3. Show Error
+            const errorMsg = document.getElementById('gender-error');
+            errorMsg.classList.remove('hidden');
+        }
+
+        // --- LOGIN LOGIC ---
         function submitName() {
+            const gender = document.getElementById('selected-gender').value;
+            
+            // CHECK FOR OTHERS OR EMPTY
+            if (gender === 'other' || gender === '') {
+                 const errorMsg = document.getElementById('gender-error');
+                 errorMsg.classList.remove('hidden');
+                 // Shake animation for card
+                 const card = document.getElementById('login-card');
+                 card.classList.add('animate-pulse');
+                 setTimeout(() => card.classList.remove('animate-pulse'), 500);
+                 return; // STOP HERE
+            }
+
             const nameInput = document.getElementById('name-input');
             const loginCard = document.getElementById('login-card');
             const proposalCard = document.getElementById('proposal-card');
@@ -155,8 +247,8 @@
                 setTimeout(() => { proposalCard.style.opacity = '1'; proposalCard.style.transform = 'translateY(0)'; }, 50);
             }, 500);
         }
-        function handleKeyPress(event) { if (event.key === 'Enter') submitName(); }
 
+        // --- PROPOSAL LOGIC ---
         let rejectCount = 0;
         const btnNo = document.getElementById('btn-no');
         const subtitle = document.getElementById('subtitle');
@@ -183,24 +275,40 @@
             }
         }
 
-        // --- UPDATED LOGIC HERE ---
-        function confirmDate(activity) {
-            // Get the gender the USER selected (The Recipient)
-            const userGender = document.getElementById('selected-gender').value;
+        // --- MONEY LOGIC ---
+        function askForMoney() {
+            document.getElementById('date-selection').classList.add('hidden');
+            document.getElementById('bank-card').classList.remove('hidden');
+        }
 
-            // LOGIC SWAP: 
-            // If User is 'woman', she makes the Sender the "Happiest MAN".
-            // If User is 'man', he makes the Sender the "Happiest WOMAN".
+        function processTransaction() {
+            // Fake Processing Delay
+            const btn = document.querySelector('#bank-card button');
+            const originalText = btn.innerText;
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                // Show Money Success
+                document.getElementById('bank-card').classList.add('hidden');
+                document.getElementById('money-success-view').classList.remove('hidden');
+                triggerConfetti();
+            }, 2000);
+        }
+
+        // --- STANDARD SUCCESS LOGIC ---
+        function confirmDate(activity) {
+            const userGender = document.getElementById('selected-gender').value;
+            // SWAP LOGIC: If User is Woman -> "Happiest Man" (Sender). 
             const senderGender = (userGender === 'woman') ? 'Man' : 'Woman';
+            const partnerType = (userGender === 'woman') ? 'Boyfriend' : 'Girlfriend';
 
             const sweetMessages = [
                 `I knew you'd say yes! You just made me the happiest ${senderGender} alive. 💖`,
                 "Finally! You are the CSS to my HTML. We belong together. 💖",
                 "Mission Accomplished! You + Me = The perfect algorithm. 🚀",
-                "Access Granted to my heart. Forever looks good on us. 🔐",
-                `Best decision ever! I promise to be the best ${userGender === 'woman' ? 'Boyfriend' : 'Girlfriend'} you could ask for. 😉`,
+                `Best decision ever! I promise to be the best ${partnerType} you could ask for. 😉`,
                 "It's official! We are now a deployed production feature. No rollbacks allowed! 💍",
-                "You just made my heart beat faster than a CPU overclock. I love you! ❤️",
                 "System Update: Happiness levels critically high! You're amazing. 🥰"
             ];
 
